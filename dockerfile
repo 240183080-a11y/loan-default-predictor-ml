@@ -13,17 +13,21 @@ COPY requirements.txt .
 # 5. Fast-install dependencies using uv
 RUN uv pip install --system -r requirements.txt
 
-# 6. Copy the rest of your project code
+# 6. Copy the rest of your project code (Includes src/, configuration files, etc.)
 COPY . .
 
 # 🔑 CRITICAL FEATURE ALIGNMENT MAPPING:
-RUN mkdir -p /app/model
+# Since COPY . . already copied your local "model/" folder to "/app/model", 
+# your MLflow artifacts are already exactly where they need to be!
+# Now, we just make sure your preprocessing files are copied into that same path safely:
 COPY src/serving/model/feature_columns.txt /app/model/feature_columns.txt
 COPY src/serving/model/preprocessing.pkl /app/model/preprocessing.pkl
 
+# 7. Set environment variables
 ENV PYTHONUNBUFFERED=1 \ 
     PYTHONPATH=/app
 
 EXPOSE 8000
 
+# 8. Start Uvicorn bound to 0.0.0.0 so Fargate can see it
 CMD ["python", "-m", "uvicorn", "src.app.main:app", "--host", "0.0.0.0", "--port", "8000"]

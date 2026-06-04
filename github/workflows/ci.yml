@@ -31,4 +31,4 @@ jobs:
           file: ./dockerfile
           push: true
           tags: moonaicer/loan-default-predictor:latest
-        
+        # end

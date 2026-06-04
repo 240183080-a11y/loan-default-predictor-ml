@@ -7,19 +7,21 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 # 3. Set working directory inside the container
 WORKDIR /app
 
+# 💡 ADD THIS BLOCK: Install libgomp1 (OpenMP) so LightGBM can run its C++ engine
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgomp1 \
+    && rm -rf /var/lib/apt/lists/*
+
 # 4. Copy dependency file first (for Docker caching optimizations)
 COPY requirements.txt .
 
 # 5. Fast-install dependencies using uv
 RUN uv pip install --system -r requirements.txt
 
-# 6. Copy the rest of your project code (Includes src/, configuration files, etc.)
+# 6. Copy the rest of your project code (Includes src/, configuration files, and your model/ folder)
 COPY . .
 
 # 🔑 CRITICAL FEATURE ALIGNMENT MAPPING:
-# Since COPY . . already copied your local "model/" folder to "/app/model", 
-# your MLflow artifacts are already exactly where they need to be!
-# Now, we just make sure your preprocessing files are copied into that same path safely:
 COPY src/serving/model/feature_columns.txt /app/model/feature_columns.txt
 COPY src/serving/model/preprocessing.pkl /app/model/preprocessing.pkl
 

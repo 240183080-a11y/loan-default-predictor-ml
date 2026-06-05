@@ -18,6 +18,11 @@ artifacts/
 data/raw/
 data/processed/
 
+.env
+.env.local
+*.pem
+*.json
+
 # BUT keep our bundled serving model in the repo
 !src/serving/model/
 !src/serving/model/**

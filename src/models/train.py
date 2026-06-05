@@ -1,9 +1,9 @@
 import os
 from pathlib import Path
 import mlflow
-import mlflow.lightgbm  # 1. CHANGED: Import LightGBM logger instead of XGBoost
+import mlflow.lightgbm
 import pandas as pd
-from lightgbm import LGBMClassifier  # 2. CHANGED: Import LightGBM instead of XGBoost
+from lightgbm import LGBMClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, recall_score
 
@@ -28,7 +28,6 @@ def train_model(df: pd.DataFrame, target_col: str):
         X, y, test_size=0.2, random_state=42
     )
 
-    # 4. CHANGED: Swap model initialization to LightGBM
     model = LGBMClassifier(
         n_estimators=300,
         learning_rate=0.1,
@@ -50,7 +49,6 @@ def train_model(df: pd.DataFrame, target_col: str):
         mlflow.log_metric("accuracy", acc)
         mlflow.log_metric("recall", rec)
         
-        # 5. CHANGED: Use mlflow.lightgbm to save the model brain
         mlflow.lightgbm.log_model(model, "model")
 
         # 🔑 Log dataset so it shows in MLflow UI

@@ -15,12 +15,12 @@ from sklearn.metrics import (
     classification_report, precision_score, recall_score,
     f1_score, roc_auc_score
 )
-from lightgbm import LGBMClassifier  # 2. CHANGED: Import LightGBM instead of XGBoost
+from lightgbm import LGBMClassifier
 
-# === Fix import path for local modules ===
+# === Import path for local modules ===
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-# Local modules - Make sure your function names match these imports!
+
 from src.data.load_data import load_data                    
 from src.data.preprocess import preprocess_data            
 from src.features.build_features import build_features     
@@ -30,7 +30,6 @@ def main(args):
     """
     Main training pipeline function that orchestrates the complete ML workflow.
     """
-    # === 4. CRITICAL: Windows MLflow Environment Fix ===
     os.environ["MLFLOW_ALLOW_FILE_STORE"] = "true"
     
     # Configure MLflow path cleanly to avoid character escape errors
@@ -70,7 +69,6 @@ def main(args):
         print("🔧 Preprocessing data...")
         df = preprocess_data(df)  
 
-        # 7. CHANGED: Update export path string for your loan folder structure
         processed_path = os.path.join(project_root, "data", "processed", "loan_default_processed.csv")
         os.makedirs(os.path.dirname(processed_path), exist_ok=True)
         df.to_csv(processed_path, index=False)
@@ -84,8 +82,7 @@ def main(args):
         
         df_enc = build_features(df)  
         
-        # 8. REMOVED: The XGBoost-specific boolean-to-int parsing loop is removed, 
-        # because LightGBM handles booleans and raw categories natively!
+        
         print(f"✅ Feature engineering completed: {df_enc.shape[1]} features")
 
         # === Save Feature Metadata ===
@@ -176,7 +173,6 @@ def main(args):
 
         # === STAGE 7: Model Serialization and Logging ===
         print("💾 Saving model to MLflow...")
-        # 10. CHANGED: Use the native mlflow.lightgbm logger
         mlflow.lightgbm.log_model(
             model, 
             artifact_path="model"  
@@ -194,7 +190,6 @@ def main(args):
 
 
 if __name__ == "__main__":
-    # 11. CHANGED: Adjust terminal command argument help texts to reflect loan values
     p = argparse.ArgumentParser(description="Run loan default pipeline with LightGBM + MLflow")
     p.add_argument("--input", type=str, required=True,
                    help="path to CSV (e.g., data/raw/loan_data.csv)")
